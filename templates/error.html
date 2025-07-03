@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>오류 - 건강검진 분석</title>
+    <link rel="stylesheet" href="{{ url_for('static', path='css/style.css') }}">
+    <style>
+        .error-container {
+            max-width: 600px;
+            margin: 0 auto;
+            text-align: center;
+            padding: 50px 20px;
+        }
+        
+        .error-icon {
+            font-size: 4rem;
+            margin-bottom: 20px;
+        }
+        
+        .error-title {
+            color: #d63031;
+            font-size: 2rem;
+            margin-bottom: 20px;
+        }
+        
+        .error-message {
+            color: #666;
+            font-size: 1.2rem;
+            margin-bottom: 30px;
+            line-height: 1.6;
+        }
+        
+        .error-details {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 20px 0;
+            text-align: left;
+        }
+        
+        .error-details summary {
+            cursor: pointer;
+            font-weight: bold;
+            color: #495057;
+            padding: 5px 0;
+        }
+        
+        .error-details pre {
+            background: #ffffff;
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+            padding: 10px;
+            margin-top: 10px;
+            overflow-x: auto;
+            font-size: 0.9rem;
+            color: #dc3545;
+        }
+        
+        .back-button {
+            display: inline-block;
+            padding: 12px 24px;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            text-decoration: none;
+            border-radius: 25px;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            margin: 10px;
+        }
+        
+        .back-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+        
+        .retry-button {
+            background: linear-gradient(45deg, #48c6ef, #6f86d6);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="card">
+            <div class="error-container">
+                <div class="error-icon">❌</div>
+                <h1 class="error-title">{{ error_title }}</h1>
+                <p class="error-message">{{ error_message }}</p>
+                
+                {% if debug_mode and error_detail %}
+                <div class="error-details">
+                    <details>
+                        <summary>기술적 세부사항 (개발자용)</summary>
+                        <pre>{{ error_detail }}</pre>
+                    </details>
+                </div>
+                {% endif %}
+                
+                <div style="margin-top: 30px;">
+                    <a href="/" class="back-button">🏠 홈으로 돌아가기</a>
+                    <a href="javascript:history.back()" class="back-button retry-button">↩️ 이전 페이지</a>
+                </div>
+                
+                <div style="margin-top: 40px; padding: 20px; background: #e3f2fd; border-radius: 8px; border-left: 4px solid #2196f3;">
+                    <h4 style="color: #1976d2; margin-bottom: 10px;">💡 도움말</h4>
+                    <ul style="text-align: left; color: #424242; line-height: 1.6;">
+                        <li>이미지 파일이 손상되었거나 너무 큰 경우 오류가 발생할 수 있습니다.</li>
+                        <li>네트워크 연결을 확인하고 다시 시도해보세요.</li>
+                        <li>문제가 지속되면 관리자에게 문의하세요.</li>
+                        <li>현재 지원되는 이미지 형식: JPG, PNG (최대 10MB)</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', path='js/main.js') }}"></script>
+</body>
+</html>

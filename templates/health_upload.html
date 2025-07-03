@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>건강검진표 업로드 - 건강검진 분석</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+    <script src="/static/js/main.js"></script></head>
+<body>
+    <div class="container">
+        <div class="card">
+            <h2 style="text-align: center; margin-bottom: 30px; color: #2c3e50;">📷 건강검진표 업로드</h2>
+            
+            {% if error %}
+            <div class="error">
+                {{ error }}
+            </div>
+            {% endif %}
+            
+            <form method="post" action="/analyze-checkup" enctype="multipart/form-data" id="upload-form">
+                <div class="upload-area" id="upload-area">
+                    <div style="font-size: 3rem; margin-bottom: 15px;">📁</div>
+                    <h3>건강검진표 이미지를 업로드하세요</h3>
+                    <p style="color: #666; margin-bottom: 20px;">JPG, PNG 파일을 지원합니다</p>
+                    <input type="file" name="checkup_image" accept="image/*" class="file-input" id="file-input" required>
+                    <button type="button" class="upload-btn" onclick="document.getElementById('file-input').click()">
+                        파일 선택
+                    </button>
+                    <div id="file-info" style="margin-top: 15px; color: #667eea; font-weight: bold;"></div>
+                </div>
+                
+                <div class="progress-bar" id="progress-bar">
+                    <div class="progress-fill" id="progress-fill"></div>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="name">이름</label>
+                        <input type="text" name="name" id="name" required placeholder="홍길동">
+                    </div>
+                    <div class="form-group">
+                        <label for="age">나이</label>
+                        <input type="number" name="age" id="age" required min="1" max="120" placeholder="30">
+                    </div>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="gender">성별</label>
+                        <select name="gender" id="gender" required>
+                            <option value="">선택하세요</option>
+                            <option value="남성">남성</option>
+                            <option value="여성">여성</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="height">키 (cm)</label>
+                        <input type="number" name="height" id="height" required min="100" max="250" step="0.1" placeholder="170.0">
+                    </div>
+                    <div class="form-group">
+                        <label for="weight">몸무게 (kg)</label>
+                        <input type="number" name="weight" id="weight" required min="30" max="200" step="0.1" placeholder="70.0">
+                    </div>
+                </div>
+                
+                <div style="text-align: center; margin-top: 30px;">
+                    <a href="/" class="btn btn-secondary" style="margin-right: 10px; text-decoration: none;">← 돌아가기</a>
+                    <button type="submit" class="btn">🔍 분석 시작</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', path='js/main.js') }}"></script>
+    <script>
+        // 파일 업로드 관련 스크립트
+        document.getElementById('file-input').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                document.getElementById('file-info').textContent = `선택된 파일: ${file.name}`;
+                document.getElementById('upload-area').style.background = 'rgba(102, 126, 234, 0.1)';
+            }
+        });
+        
+        // 드래그 앤 드롭 처리
+        const uploadArea = document.getElementById('upload-area');
+        
+        uploadArea.addEventListener('dragover', function(e) {
+            e.preventDefault();
+            uploadArea.classList.add('dragover');
+        });
+        
+        uploadArea.addEventListener('dragleave', function(e) {
+            e.preventDefault();
+            uploadArea.classList.remove('dragover');
+        });
+        
+        uploadArea.addEventListener('drop', function(e) {
+            e.preventDefault();
+            uploadArea.classList.remove('dragover');
+            
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                document.getElementById('file-input').files = files;
+                document.getElementById('file-info').textContent = `선택된 파일: ${files[0].name}`;
+                uploadArea.style.background = 'rgba(102, 126, 234, 0.1)';
+            }
+        });
+        
+        // 폼 제출 시 진행률 표시
+        document.getElementById('upload-form').addEventListener('submit', function(e) {
+            const progressBar = document.getElementById('progress-bar');
+            const progressFill = document.getElementById('progress-fill');
+            
+            progressBar.style.display = 'block';
+            
+            let progress = 0;
+            const interval = setInterval(function() {
+                progress += Math.random() * 30;
+                if (progress >= 90) {
+                    progress = 90;
+                    clearInterval(interval);
+                }
+                progressFill.style.width = progress + '%';
+            }, 200);
+        });
+    </script>
+</body>
+</html>

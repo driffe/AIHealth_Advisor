@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>수동 입력 - 건강검진 분석</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+    <script src="/static/js/main.js"></script></head>
+<body>
+    <div class="container">
+        <div class="card">
+            <h2 style="text-align: center; margin-bottom: 30px; color: #2c3e50;">✏️ 건강검진 수치 직접 입력</h2>
+            
+            {% if error %}
+            <div class="error">
+                {{ error }}
+            </div>
+            {% endif %}
+            
+            <form method="post" action="/analyze-manual" id="manual-form">
+                <div class="health-section">
+                    <h3>📋 기본 정보</h3>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="name">이름</label>
+                            <input type="text" name="name" id="name" required placeholder="홍길동">
+                        </div>
+                        <div class="form-group">
+                            <label for="age">나이</label>
+                            <input type="number" name="age" id="age" required min="1" max="120" placeholder="30">
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="gender">성별</label>
+                            <select name="gender" id="gender" required>
+                                <option value="">선택하세요</option>
+                                <option value="남성">남성</option>
+                                <option value="여성">여성</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="height">키 (cm)</label>
+                            <input type="number" name="height" id="height" required min="100" max="250" step="0.1" placeholder="170.0">
+                        </div>
+                        <div class="form-group">
+                            <label for="weight">몸무게 (kg)</label>
+                            <input type="number" name="weight" id="weight" required min="30" max="200" step="0.1" placeholder="70.0">
+                        </div>
+                    </div>
+                    
+                    <div class="bmi-display" id="bmi-display" style="text-align: center; margin-top: 15px; padding: 10px; background: #f8f9fa; border-radius: 8px; display: none;">
+                        <strong>계산된 BMI: <span id="bmi-value">-</span></strong>
+                    </div>
+                </div>
+                
+                <div class="health-section">
+                    <h3>🩸 혈압 (mmHg)</h3>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="systolic_bp">수축기 혈압</label>
+                            <input type="number" name="systolic_bp" id="systolic_bp" min="70" max="250" placeholder="120">
+                        </div>
+                        <div class="form-group">
+                            <label for="diastolic_bp">이완기 혈압</label>
+                            <input type="number" name="diastolic_bp" id="diastolic_bp" min="40" max="150" placeholder="80">
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="health-section">
+                    <h3>🍭 혈당 (mg/dL)</h3>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="fasting_glucose">공복혈당</label>
+                            <input type="number" name="fasting_glucose" id="fasting_glucose" min="50" max="500" placeholder="95">
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="health-section">
+                    <h3>🧪 콜레스테롤 (mg/dL)</h3>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="total_cholesterol">총 콜레스테롤</label>
+                            <input type="number" name="total_cholesterol" id="total_cholesterol" min="100" max="500" placeholder="200">
+                        </div>
+                        <div class="form-group">
+                            <label for="hdl_cholesterol">HDL 콜레스테롤</label>
+                            <input type="number" name="hdl_cholesterol" id="hdl_cholesterol" min="20" max="150" placeholder="50">
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="ldl_cholesterol">LDL 콜레스테롤</label>
+                            <input type="number" name="ldl_cholesterol" id="ldl_cholesterol" min="50" max="300" placeholder="130">
+                        </div>
+                        <div class="form-group">
+                            <label for="triglycerides">중성지방</label>
+                            <input type="number" name="triglycerides" id="triglycerides" min="50" max="1000" placeholder="150">
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="health-section">
+                    <h3>🏥 간기능 (U/L)</h3>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="ast">AST (GOT)</label>
+                            <input type="number" name="ast" id="ast" min="10" max="500" placeholder="30">
+                        </div>
+                        <div class="form-group">
+                            <label for="alt">ALT (GPT)</label>
+                            <input type="number" name="alt" id="alt" min="10" max="500" placeholder="35">
+                        </div>
+                        <div class="form-group">
+                            <label for="ggt">GGT</label>
+                            <input type="number" name="ggt" id="ggt" min="5" max="500" placeholder="40">
+                        </div>
+                    </div>
+                </div>
+                
+                <div style="text-align: center; margin-top: 30px;">
+                    <a href="/" class="btn btn-secondary" style="margin-right: 10px; text-decoration: none;">← 돌아가기</a>
+                    <button type="submit" class="btn">🔍 분석 시작</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', path='js/main.js') }}"></script>
+    <script>
+        // BMI 자동 계산
+        function calculateBMI() {
+            const height = parseFloat(document.getElementById('height').value);
+            const weight = parseFloat(document.getElementById('weight').value);
+            
+            if (height && weight) {
+                const bmi = weight / ((height / 100) ** 2);
+                document.getElementById('bmi-value').textContent = bmi.toFixed(1);
+                document.getElementById('bmi-display').style.display = 'block';
+                
+                // BMI 분류 표시
+                let classification = '';
+                if (bmi < 18.5) classification = '(저체중)';
+                else if (bmi < 23) classification = '(정상)';
+                else if (bmi < 25) classification = '(과체중)';
+                else classification = '(비만)';
+                
+                document.getElementById('bmi-value').textContent = `${bmi.toFixed(1)} ${classification}`;
+            } else {
+                document.getElementById('bmi-display').style.display = 'none';
+            }
+        }
+        
+        // 실시간 BMI 계산
+        document.getElementById('height').addEventListener('input', calculateBMI);
+        document.getElementById('weight').addEventListener('input', calculateBMI);
+        
+        // 폼 제출 시 처리
+        document.getElementById('manual-form').addEventListener('submit', function(e) {
+            console.log('수동 입력 폼 제출됨');
+        });
+    </script>
+</body>
+</html> 

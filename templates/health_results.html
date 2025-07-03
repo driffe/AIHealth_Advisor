@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>분석 결과 - 건강검진 분석</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+    <script src="/static/js/main.js"></script></head>
+<body>
+    <div class="container">
+        <div class="card">
+            <h2 style="text-align: center; margin-bottom: 30px; color: #2c3e50;">📊 건강검진 분석 결과</h2>
+            
+            <!-- 기본 정보 -->
+            <div class="health-section">
+                <h3>👤 기본 정보</h3>
+                <div class="health-grid">
+                    <div class="health-card">
+                        <h4>{{ name }}님 ({{ age }}세, {{ gender }})</h4>
+                        <div>키: {{ height }}cm, 몸무게: {{ weight }}kg</div>
+                    </div>
+                    <div class="health-card">
+                        <h4>BMI</h4>
+                        <div class="health-value">{{ bmi }}</div>
+                        <div class="health-status {% if comparison_result.BMI_분류 == '정상' %}status-normal{% elif comparison_result.BMI_분류 in ['과체중', '저체중'] %}status-warning{% else %}status-danger{% endif %}">
+                            {{ comparison_result.BMI_분류 }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 종합 점수 -->
+            <div class="health-section">
+                <h3>🎯 종합 건강 점수</h3>
+                <div style="text-align: center;">
+                    <div class="score-circle {% if health_analysis.종합_점수.총점 >= 90 %}score-excellent{% elif health_analysis.종합_점수.총점 >= 80 %}score-good{% elif health_analysis.종합_점수.총점 >= 60 %}score-fair{% else %}score-poor{% endif %}">
+                        <span>{{ health_analysis.종합_점수.총점 }}</span>
+                    </div>
+                    <h4>{{ health_analysis.종합_점수.등급 }}</h4>
+                    {% if health_analysis.종합_점수.개선점 %}
+                    <div style="margin-top: 15px;">
+                        {% for point in health_analysis.종합_점수.개선점 %}
+                        <div class="health-status status-warning" style="margin: 5px;">{{ point }}</div>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                    
+                    <!-- 세부 점수 표시 -->
+                    <div class="health-grid" style="margin-top: 20px;">
+                        <div class="health-card">
+                            <h4>BMI 점수</h4>
+                            <div class="health-value">{{ health_analysis.종합_점수.세부점수.BMI }}/25</div>
+                        </div>
+                        <div class="health-card">
+                            <h4>혈압 점수</h4>
+                            <div class="health-value">{{ health_analysis.종합_점수.세부점수.혈압 }}/25</div>
+                        </div>
+                        <div class="health-card">
+                            <h4>혈당 점수</h4>
+                            <div class="health-value">{{ health_analysis.종합_점수.세부점수.혈당 }}/25</div>
+                        </div>
+                        <div class="health-card">
+                            <h4>콜레스테롤 점수</h4>
+                            <div class="health-value">{{ health_analysis.종합_점수.세부점수.콜레스테롤 }}/25</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 주요 검진 결과 -->
+            <div class="health-section">
+                <h3>🔬 주요 검진 결과</h3>
+                <div class="health-grid">
+                    {% if comparison_result.혈압_분석 %}
+                    <div class="health-card">
+                        <h4>혈압</h4>
+                        <div class="health-value">{{ comparison_result.혈압_분석.수축기.값 }}/{{ comparison_result.혈압_분석.이완기.값 }} mmHg</div>
+                        <div class="health-status {% if comparison_result.혈압_분석.분류 == '정상' %}status-normal{% elif comparison_result.혈압_분석.분류 == '주의' %}status-warning{% else %}status-danger{% endif %}">
+                            {{ comparison_result.혈압_분석.분류 }}
+                        </div>
+                        <div style="font-size: 0.9rem; color: #666; margin-top: 5px;">
+                            정상 범위: 120/80 mmHg 미만
+                        </div>
+                    </div>
+                    {% endif %}
+                    
+                    {% if comparison_result.혈당_분석 %}
+                    <div class="health-card">
+                        <h4>공복혈당</h4>
+                        <div class="health-value">{{ comparison_result.혈당_분석.값 }} mg/dL</div>
+                        <div class="health-status {% if comparison_result.혈당_분석.분류 == '정상' %}status-normal{% elif comparison_result.혈당_분석.분류 == '주의' %}status-warning{% else %}status-danger{% endif %}">
+                            {{ comparison_result.혈당_분석.분류 }}
+                        </div>
+                        <div style="font-size: 0.9rem; color: #666; margin-top: 5px;">
+                            정상 범위: 70-100 mg/dL
+                        </div>
+                    </div>
+                    {% endif %}
+                    
+                    {% if comparison_result.콜레스테롤_분석 %}
+                        {% for key, value in comparison_result.콜레스테롤_분석.items() %}
+                        <div class="health-card">
+                            <h4>{{ key }}</h4>
+                            <div class="health-value">{{ value.값 }} mg/dL</div>
+                            <div class="health-status {% if value.분류 == '정상' %}status-normal{% elif value.분류 == '주의' %}status-warning{% else %}status-danger{% endif %}">
+                                {{ value.분류 }}
+                            </div>
+                            <div style="font-size: 0.9rem; color: #666; margin-top: 5px;">
+                                {% if key == '총콜레스테롤' %}정상: 200 미만
+                                {% elif key == 'HDL콜레스테롤' %}정상: 60 이상
+                                {% elif key == 'LDL콜레스테롤' %}정상: 130 미만
+                                {% elif key == '중성지방' %}정상: 150 미만
+                                {% endif %}
+                            </div>
+                        </div>
+                        {% endfor %}
+                    {% endif %}
+                    
+                    {% if comparison_result.간기능_분석 %}
+                        {% for key, value in comparison_result.간기능_분석.items() %}
+                        <div class="health-card">
+                            <h4>{{ key }}</h4>
+                            <div class="health-value">{{ value.값 }} U/L</div>
+                            <div class="health-status {% if value.분류 == '정상' %}status-normal{% elif value.분류 == '주의' %}status-warning{% else %}status-danger{% endif %}">
+                                {{ value.분류 }}
+                            </div>
+                            <div style="font-size: 0.9rem; color: #666; margin-top: 5px;">
+                                정상 범위: 40 U/L 미만
+                            </div>
+                        </div>
+                        {% endfor %}
+                    {% endif %}
+                </div>
+            </div>
+            
+            <!-- 한국 통계 비교 -->
+            <div class="health-section">
+                <h3>📊 동년배 평균과 비교</h3>
+                <div class="health-grid">
+                    <div class="health-card">
+                        <h4>연령대</h4>
+                        <div class="health-value">{{ comparison_result.연령대 }}</div>
+                        <div style="font-size: 0.9rem; color: #666;">
+                            한국인 평균 기준
+                        </div>
+                    </div>
+                    <div class="health-card">
+                        <h4>BMI 비교</h4>
+                        <div class="health-value">
+                            {% if comparison_result.BMI_비교.차이 > 0 %}+{% endif %}{{ comparison_result.BMI_비교.차이 }}
+                        </div>
+                        <div style="font-size: 0.9rem; color: #666;">
+                            동년배 평균: {{ comparison_result.BMI_비교.동연령대_평균 }}
+                        </div>
+                        <div style="font-size: 0.8rem; margin-top: 5px;">
+                            {% if comparison_result.BMI_비교.차이 > 1 %}
+                                <span style="color: #dc3545;">평균보다 높음</span>
+                            {% elif comparison_result.BMI_비교.차이 < -1 %}
+                                <span style="color: #dc3545;">평균보다 낮음</span>
+                            {% else %}
+                                <span style="color: #28a745;">평균 수준</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% if comparison_result.혈압_분석 %}
+                    <div class="health-card">
+                        <h4>혈압 비교</h4>
+                        <div class="health-value">
+                            {% if comparison_result.혈압_분석.수축기.평균과_차이 > 0 %}+{% endif %}{{ comparison_result.혈압_분석.수축기.평균과_차이 }}/{% if comparison_result.혈압_분석.이완기.평균과_차이 > 0 %}+{% endif %}{{ comparison_result.혈압_분석.이완기.평균과_차이 }}
+                        </div>
+                        <div style="font-size: 0.9rem; color: #666;">평균 대비 차이</div>
+                    </div>
+                    {% endif %}
+                    <div class="health-card">
+                        <h4>건강 순위</h4>
+                        <div class="health-value">
+                            {% if health_analysis.종합_점수.총점 >= 85 %}상위 20%
+                            {% elif health_analysis.종합_점수.총점 >= 70 %}상위 50%
+                            {% elif health_analysis.종합_점수.총점 >= 60 %}하위 50%
+                            {% else %}하위 20%
+                            {% endif %}
+                        </div>
+                        <div style="font-size: 0.9rem; color: #666;">동년배 기준</div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 위험 요소 -->
+            {% if health_analysis.위험_요소 %}
+            <div class="health-section">
+                <h3>⚠️ 주의할 점</h3>
+                <div class="health-grid">
+                    {% for risk in health_analysis.위험_요소 %}
+                    <div class="health-card">
+                        <h4>{{ risk.분류 }}</h4>
+                        <div class="health-status {% if risk.위험도 == '높음' %}status-danger{% else %}status-warning{% endif %}">
+                            위험도: {{ risk.위험도 }}
+                        </div>
+                        <p style="margin-top: 10px; font-size: 0.9rem; line-height: 1.4;">{{ risk.설명 }}</p>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+            
+            <!-- 맞춤형 권장사항 -->
+            <div class="health-section">
+                <h3>💡 맞춤형 건강 관리 방법</h3>
+                <div class="health-grid">
+                    <div class="health-card">
+                        <h4>🍽️ 식단 관리</h4>
+                        {% if health_analysis.권장사항.식단 %}
+                        <ul class="recommendation-list">
+                            {% for recommendation in health_analysis.권장사항.식단 %}
+                            <li>{{ recommendation }}</li>
+                            {% endfor %}
+                        </ul>
+                        {% else %}
+                        <p style="color: #666;">현재 식단을 유지하세요.</p>
+                        {% endif %}
+                    </div>
+                    <div class="health-card">
+                        <h4>🏃‍♂️ 운동</h4>
+                        {% if health_analysis.권장사항.운동 %}
+                        <ul class="recommendation-list">
+                            {% for recommendation in health_analysis.권장사항.운동 %}
+                            <li>{{ recommendation }}</li>
+                            {% endfor %}
+                        </ul>
+                        {% else %}
+                        <p style="color: #666;">현재 운동량을 유지하세요.</p>
+                        {% endif %}
+                    </div>
+                    <div class="health-card">
+                        <h4>🌱 생활습관</h4>
+                        {% if health_analysis.권장사항.생활습관 %}
+                        <ul class="recommendation-list">
+                            {% for recommendation in health_analysis.권장사항.생활습관 %}
+                            <li>{{ recommendation }}</li>
+                            {% endfor %}
+                        </ul>
+                        {% else %}
+                        <p style="color: #666;">현재 생활습관을 유지하세요.</p>
+                        {% endif %}
+                    </div>
+                    <div class="health-card">
+                        <h4>🏥 정기검진</h4>
+                        {% if health_analysis.권장사항.정기검진 %}
+                        <ul class="recommendation-list">
+                            {% for recommendation in health_analysis.권장사항.정기검진 %}
+                            <li>{{ recommendation }}</li>
+                            {% endfor %}
+                        </ul>
+                        {% else %}
+                        <p style="color: #666;">정기적인 건강검진을 받으세요.</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            
+            <!-- AI 분석 -->
+            <div class="health-section">
+                <h3>🤖 AI 전문 분석</h3>
+                <div class="health-card">
+                    <div style="line-height: 1.8; white-space: pre-line;">
+                        {{ health_analysis.AI_분석 }}
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 쉬운 설명 -->
+            <div class="health-section">
+                <h3>📖 쉬운 용어 설명</h3>
+                <div class="health-grid">
+                    {% for key, explanation in health_analysis.쉬운_설명.items() %}
+                    <div class="health-card">
+                        <h4>{{ key }}</h4>
+                        <p style="line-height: 1.5;">{{ explanation }}</p>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            
+            <!-- 다음 검진 권장 -->
+            <div class="health-section">
+                <h3>📅 다음 검진 계획</h3>
+                <div class="health-grid">
+                    {% for key, value in health_analysis.다음_검진.items() %}
+                    <div class="health-card">
+                        <h4>{{ key }}</h4>
+                        <div class="health-value">{{ value }}</div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            
+            <!-- 건강 개선 목표 -->
+            <div class="health-section">
+                <h3>🎯 3개월 건강 개선 목표</h3>
+                <div class="health-grid">
+                    <div class="health-card">
+                        <h4>단기 목표 (1개월)</h4>
+                        <ul class="recommendation-list">
+                            {% if comparison_result.BMI_분류 in ['과체중', '비만'] %}
+                            <li>체중 2-3kg 감량</li>
+                            {% endif %}
+                            {% if comparison_result.혈압_분석 and comparison_result.혈압_분석.분류 != '정상' %}
+                            <li>혈압 5mmHg 감소</li>
+                            {% endif %}
+                            <li>주 3회 이상 운동하기</li>
+                            <li>금주 또는 절주 실천</li>
+                        </ul>
+                    </div>
+                    <div class="health-card">
+                        <h4>중기 목표 (3개월)</h4>
+                        <ul class="recommendation-list">
+                            {% if comparison_result.BMI_분류 in ['과체중', '비만'] %}
+                            <li>목표 BMI 23 달성</li>
+                            {% endif %}
+                            {% if comparison_result.혈당_분석 and comparison_result.혈당_분석.분류 != '정상' %}
+                            <li>공복혈당 100mg/dL 이하</li>
+                            {% endif %}
+                            <li>전체 건강점수 10점 향상</li>
+                            <li>스트레스 관리 루틴 정착</li>
+                        </ul>
+                    </div>
+                    <div class="health-card">
+                        <h4>장기 목표 (6개월)</h4>
+                        <ul class="recommendation-list">
+                            <li>종합 건강점수 85점 이상</li>
+                            <li>모든 수치 정상 범위 달성</li>
+                            <li>건강한 생활습관 완전 정착</li>
+                            <li>동년배 상위 20% 건강 수준</li>
+                        </ul>
+                    </div>
+                    <div class="health-card">
+                        <h4>추적 관리</h4>
+                        <ul class="recommendation-list">
+                            <li>매월 체중, 혈압 측정</li>
+                            <li>3개월마다 기본 검사</li>
+                            <li>6개월마다 종합검진</li>
+                            <li>1년마다 전문의 상담</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 응급상황 가이드 -->
+            <div class="health-section">
+                <h3>🚨 응급상황 가이드</h3>
+                <div class="health-card" style="background: #fff5f5; border-left: 4px solid #dc3545;">
+                    <h4 style="color: #dc3545; margin-bottom: 15px;">즉시 병원에 가야 하는 경우</h4>
+                    <div class="health-grid">
+                        <div>
+                            <h5>혈압 관련</h5>
+                            <ul style="margin: 10px 0; padding-left: 20px;">
+                                <li>수축기 혈압 180mmHg 이상</li>
+                                <li>이완기 혈압 110mmHg 이상</li>
+                                <li>심한 두통, 가슴 통증</li>
+                                <li>호흡곤란, 시야 장애</li>
+                            </ul>
+                        </div>
+                        <div>
+                            <h5>혈당 관련</h5>
+                            <ul style="margin: 10px 0; padding-left: 20px;">
+                                <li>혈당 300mg/dL 이상</li>
+                                <li>의식 저하, 극심한 갈증</li>
+                                <li>구토, 복통</li>
+                                <li>호흡 곤란</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div style="margin-top: 15px; padding: 10px; background: #f8f9fa; border-radius: 5px;">
+                        <strong>응급실 연락처: 119</strong><br>
+                        <small>의식이 있으면 가까운 응급실로, 의식이 없으면 즉시 119 신고</small>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 참고사항 -->
+            <div class="health-section">
+                <h3>📝 참고사항</h3>
+                <div class="health-card" style="background: #f8f9fa; border-left: 4px solid #6c757d;">
+                    <div style="font-size: 0.9rem; line-height: 1.6; color: #495057;">
+                        <p><strong>⚠️ 중요한 안내사항:</strong></p>
+                        <ul style="margin: 10px 0; padding-left: 20px;">
+                            <li>이 분석 결과는 <strong>참고용</strong>이며, 의료진의 진단을 대체할 수 없습니다.</li>
+                            <li>건강에 이상이 있다고 생각되면 반드시 <strong>전문의와 상담</strong>하세요.</li>
+                            <li>약물 복용 중이거나 기존 질환이 있는 경우, 의사와 상의 후 권장사항을 따르세요.</li>
+                            <li>정기적인 건강검진을 통해 건강 상태를 지속적으로 관리하세요.</li>
+                        </ul>
+                        
+                        <p style="margin-top: 15px;"><strong>📞 전문 상담이 필요한 경우:</strong></p>
+                        <ul style="margin: 10px 0; padding-left: 20px;">
+                            <li>가정의학과: 종합적인 건강 관리</li>
+                            <li>내분비내과: 당뇨, 갑상선 질환</li>
+                            <li>심장내과: 심혈관 질환, 고혈압</li>
+                            <li>소화기내과: 간기능 이상</li>
+                        </ul>
+                        
+                        <p style="margin-top: 15px; padding: 10px; background: #e7f3ff; border-radius: 5px;">
+                            <strong>💡 건강한 삶을 위한 한 마디:</strong><br>
+                            건강은 하루아침에 만들어지지 않습니다. 꾸준한 관리와 작은 변화들이 모여 큰 건강을 만듭니다. 
+                            오늘부터 작은 것부터 시작해보세요! 💪
+                        </p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 액션 버튼 -->
+            <div style="text-align: center; margin-top: 40px; padding: 20px; background: #f8f9fa; border-radius: 10px;">
+                <h4 style="margin-bottom: 20px; color: #2c3e50;">📋 결과 활용하기</h4>
+                <div style="display: flex; gap: 15px; justify-content: center; flex-wrap: wrap;">
+                    <a href="/" class="btn btn-secondary" style="text-decoration: none;">🏠 처음으로</a>
+                    <button type="button" class="btn" onclick="window.print()">🖨️ 결과 인쇄</button>
+                    <button type="button" class="btn" onclick="shareResults()">📱 결과 공유</button>
+                    <button type="button" class="btn btn-secondary" onclick="downloadPDF()">📄 PDF 다운로드</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', path='js/main.js') }}"></script>
+    <script>
+        // 결과 공유 기능
+        function shareResults() {
+            if (navigator.share) {
+                navigator.share({
+                    title: '건강검진 분석 결과',
+                    text: '건강검진 분석 결과를 확인해보세요!',
+                    url: window.location.href
+                });
+            } else {
+                // 폴백: 클립보드에 복사
+                navigator.clipboard.writeText(window.location.href).then(() => {
+                    alert('링크가 클립보드에 복사되었습니다!');
+                });
+            }
+        }
+        
+        // PDF 다운로드 (실제 구현 시 서버 기능 필요)
+        function downloadPDF() {
+            alert('PDF 다운로드 기능은 개발 중입니다.');
+            // 실제 구현 시:
+            // window.location.href = '/download-pdf/' + result_id;
+        }
+        
+        // 페이지 로드 시 결과 애니메이션 실행
+        document.addEventListener('DOMContentLoaded', function() {
+            // 점수 애니메이션
+            const scoreElement = document.querySelector('.score-circle span');
+            if (scoreElement) {
+                const finalScore = parseInt(scoreElement.textContent);
+                let currentScore = 0;
+                const increment = finalScore / 50;
+                
+                const animation = setInterval(() => {
+                    currentScore += increment;
+                    if (currentScore >= finalScore) {
+                        currentScore = finalScore;
+                        clearInterval(animation);
+                    }
+                    scoreElement.textContent = Math.round(currentScore);
+                }, 20);
+            }
+        });
+    </script>
+</body>
+</html>

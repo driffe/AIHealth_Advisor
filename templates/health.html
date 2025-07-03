@@ -1,0 +1,818 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>건강검진표 분석 시스템</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .card {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        
+        .hero {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        
+        .hero h1 {
+            font-size: 3rem;
+            color: white;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        .hero p {
+            font-size: 1.2rem;
+            color: rgba(255,255,255,0.9);
+        }
+        
+        .features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+        
+        .feature {
+            text-align: center;
+        }
+        
+        .feature-icon {
+            font-size: 3rem;
+            margin-bottom: 15px;
+        }
+        
+        .feature h3 {
+            color: #2c3e50;
+            margin-bottom: 15px;
+        }
+        
+        .cta-buttons {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        
+        .btn {
+            display: inline-block;
+            padding: 15px 30px;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            text-decoration: none;
+            border-radius: 50px;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            border: none;
+            cursor: pointer;
+            font-size: 1.1rem;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+        
+        .btn-secondary {
+            background: linear-gradient(45deg, #48c6ef, #6f86d6);
+        }
+        
+        .form-container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+        
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.3s ease;
+        }
+        
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        .form-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+        }
+        
+        .upload-area {
+            border: 3px dashed #667eea;
+            border-radius: 15px;
+            padding: 40px;
+            text-align: center;
+            margin-bottom: 20px;
+            transition: all 0.3s ease;
+        }
+        
+        .upload-area:hover {
+            background: rgba(102, 126, 234, 0.1);
+        }
+        
+        .upload-area.dragover {
+            background: rgba(102, 126, 234, 0.2);
+            border-color: #764ba2;
+        }
+        
+        .file-input {
+            display: none;
+        }
+        
+        .upload-btn {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            padding: 12px 25px;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+        
+        .upload-btn:hover {
+            transform: translateY(-2px);
+        }
+        
+        .progress-bar {
+            width: 100%;
+            height: 20px;
+            background: #e0e0e0;
+            border-radius: 10px;
+            overflow: hidden;
+            margin: 20px 0;
+            display: none;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            transition: width 0.3s ease;
+        }
+        
+        .error {
+            background: #ffe6e6;
+            color: #d63031;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border-left: 4px solid #d63031;
+        }
+        
+        .success {
+            background: #e6f7e1;
+            color: #00b894;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border-left: 4px solid #00b894;
+        }
+        
+        .health-section {
+            margin-bottom: 30px;
+        }
+        
+        .health-section h3 {
+            color: #2c3e50;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #667eea;
+        }
+        
+        .health-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+        }
+        
+        .health-card {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            border-left: 4px solid #667eea;
+        }
+        
+        .health-value {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+        
+        .health-status {
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: bold;
+            margin-top: 10px;
+            display: inline-block;
+        }
+        
+        .status-normal {
+            background: #d4edda;
+            color: #155724;
+        }
+        
+        .status-warning {
+            background: #fff3cd;
+            color: #856404;
+        }
+        
+        .status-danger {
+            background: #f8d7da;
+            color: #721c24;
+        }
+        
+        .recommendation-list {
+            list-style: none;
+        }
+        
+        .recommendation-list li {
+            padding: 10px;
+            margin: 5px 0;
+            background: #f1f3f4;
+            border-radius: 5px;
+            border-left: 3px solid #667eea;
+        }
+        
+        .score-circle {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            font-weight: bold;
+            color: white;
+            margin: 0 auto 20px;
+        }
+        
+        .score-excellent {
+            background: linear-gradient(45deg, #00b894, #00cec9);
+        }
+        
+        .score-good {
+            background: linear-gradient(45deg, #00b894, #fdcb6e);
+        }
+        
+        .score-fair {
+            background: linear-gradient(45deg, #fdcb6e, #e17055);
+        }
+        
+        .score-poor {
+            background: linear-gradient(45deg, #e17055, #d63031);
+        }
+        
+        @media (max-width: 768px) {
+            .hero h1 {
+                font-size: 2rem;
+            }
+            
+            .cta-buttons {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 메인 랜딩 페이지 -->
+    <div class="container" id="landing-page">
+        <div class="hero">
+            <h1>🏥 건강검진표 분석 시스템</h1>
+            <p>AI가 분석하는 나의 건강 상태</p>
+        </div>
+        
+        <div class="card">
+            <div class="features">
+                <div class="feature">
+                    <div class="feature-icon">📊</div>
+                    <h3>한국 통계 비교</h3>
+                    <p>내 건강 수치를 동년배 평균과 비교해서 객관적인 평가를 받아보세요</p>
+                </div>
+                <div class="feature">
+                    <div class="feature-icon">🤖</div>
+                    <h3>AI 건강 분석</h3>
+                    <p>최신 AI 기술로 건강검진 결과를 상세하게 분석하고 설명해드립니다</p>
+                </div>
+                <div class="feature">
+                    <div class="feature-icon">💡</div>
+                    <h3>맞춤형 건강 관리</h3>
+                    <p>개인별 맞춤 건강 관리 방법과 생활습관 개선 방안을 제시합니다</p>
+                </div>
+            </div>
+            
+            <div class="cta-buttons">
+                <a href="#upload-form" class="btn" onclick="showUploadForm()">📷 건강검진표 업로드</a>
+                <a href="#manual-form" class="btn btn-secondary" onclick="showManualForm()">✏️ 수치 직접 입력</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- 이미지 업로드 폼 -->
+    <div class="container" id="upload-form" style="display: none;">
+        <div class="card">
+            <h2 style="text-align: center; margin-bottom: 30px; color: #2c3e50;">📷 건강검진표 업로드</h2>
+            
+            <form method="post" action="/analyze-checkup" enctype="multipart/form-data" id="upload-form-element">
+                <div class="upload-area" id="upload-area">
+                    <div style="font-size: 3rem; margin-bottom: 15px;">📁</div>
+                    <h3>건강검진표 이미지를 업로드하세요</h3>
+                    <p style="color: #666; margin-bottom: 20px;">JPG, PNG 파일을 지원합니다</p>
+                    <input type="file" name="checkup_image" accept="image/*" class="file-input" id="file-input" required>
+                    <button type="button" class="upload-btn" onclick="document.getElementById('file-input').click()">
+                        파일 선택
+                    </button>
+                    <div id="file-info" style="margin-top: 15px; color: #667eea; font-weight: bold;"></div>
+                </div>
+                
+                <div class="progress-bar" id="progress-bar">
+                    <div class="progress-fill" id="progress-fill"></div>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="name">이름</label>
+                        <input type="text" name="name" id="name" required placeholder="홍길동">
+                    </div>
+                    <div class="form-group">
+                        <label for="age">나이</label>
+                        <input type="number" name="age" id="age" required min="1" max="120" placeholder="30">
+                    </div>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="gender">성별</label>
+                        <select name="gender" id="gender" required>
+                            <option value="">선택하세요</option>
+                            <option value="남성">남성</option>
+                            <option value="여성">여성</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="height">키 (cm)</label>
+                        <input type="number" name="height" id="height" required min="100" max="250" step="0.1" placeholder="170.0">
+                    </div>
+                    <div class="form-group">
+                        <label for="weight">몸무게 (kg)</label>
+                        <input type="number" name="weight" id="weight" required min="30" max="200" step="0.1" placeholder="70.0">
+                    </div>
+                </div>
+                
+                <div style="text-align: center; margin-top: 30px;">
+                    <button type="button" class="btn btn-secondary" onclick="showLanding()" style="margin-right: 10px;">← 돌아가기</button>
+                    <button type="submit" class="btn">🔍 분석 시작</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- 수동 입력 폼 -->
+    <div class="container" id="manual-form" style="display: none;">
+        <div class="card">
+            <h2 style="text-align: center; margin-bottom: 30px; color: #2c3e50;">✏️ 건강검진 수치 직접 입력</h2>
+            
+            <form method="post" action="/analyze-manual" id="manual-form-element">
+                <div class="health-section">
+                    <h3>📋 기본 정보</h3>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="manual_name">이름</label>
+                            <input type="text" name="name" id="manual_name" required placeholder="홍길동">
+                        </div>
+                        <div class="form-group">
+                            <label for="manual_age">나이</label>
+                            <input type="number" name="age" id="manual_age" required min="1" max="120" placeholder="30">
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="manual_gender">성별</label>
+                            <select name="gender" id="manual_gender" required>
+                                <option value="">선택하세요</option>
+                                <option value="남성">남성</option>
+                                <option value="여성">여성</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="manual_height">키 (cm)</label>
+                            <input type="number" name="height" id="manual_height" required min="100" max="250" step="0.1" placeholder="170.0">
+                        </div>
+                        <div class="form-group">
+                            <label for="manual_weight">몸무게 (kg)</label>
+                            <input type="number" name="weight" id="manual_weight" required min="30" max="200" step="0.1" placeholder="70.0">
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="health-section">
+                    <h3>🩸 혈압 (mmHg)</h3>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="systolic_bp">수축기 혈압</label>
+                            <input type="number" name="systolic_bp" id="systolic_bp" min="70" max="250" placeholder="120">
+                        </div>
+                        <div class="form-group">
+                            <label for="diastolic_bp">이완기 혈압</label>
+                            <input type="number" name="diastolic_bp" id="diastolic_bp" min="40" max="150" placeholder="80">
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="health-section">
+                    <h3>🍭 혈당 (mg/dL)</h3>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="fasting_glucose">공복혈당</label>
+                            <input type="number" name="fasting_glucose" id="fasting_glucose" min="50" max="500" placeholder="95">
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="health-section">
+                    <h3>🧪 콜레스테롤 (mg/dL)</h3>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="total_cholesterol">총 콜레스테롤</label>
+                            <input type="number" name="total_cholesterol" id="total_cholesterol" min="100" max="500" placeholder="200">
+                        </div>
+                        <div class="form-group">
+                            <label for="hdl_cholesterol">HDL 콜레스테롤</label>
+                            <input type="number" name="hdl_cholesterol" id="hdl_cholesterol" min="20" max="150" placeholder="50">
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="ldl_cholesterol">LDL 콜레스테롤</label>
+                            <input type="number" name="ldl_cholesterol" id="ldl_cholesterol" min="50" max="300" placeholder="130">
+                        </div>
+                        <div class="form-group">
+                            <label for="triglycerides">중성지방</label>
+                            <input type="number" name="triglycerides" id="triglycerides" min="50" max="1000" placeholder="150">
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="health-section">
+                    <h3>🏥 간기능 (U/L)</h3>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="ast">AST (GOT)</label>
+                            <input type="number" name="ast" id="ast" min="10" max="500" placeholder="30">
+                        </div>
+                        <div class="form-group">
+                            <label for="alt">ALT (GPT)</label>
+                            <input type="number" name="alt" id="alt" min="10" max="500" placeholder="35">
+                        </div>
+                        <div class="form-group">
+                            <label for="ggt">GGT</label>
+                            <input type="number" name="ggt" id="ggt" min="5" max="500" placeholder="40">
+                        </div>
+                    </div>
+                </div>
+                
+                <div style="text-align: center; margin-top: 30px;">
+                    <button type="button" class="btn btn-secondary" onclick="showLanding()" style="margin-right: 10px;">← 돌아가기</button>
+                    <button type="submit" class="btn">🔍 분석 시작</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- 결과 페이지 -->
+    <div class="container" id="results-page" style="display: none;">
+        <div class="card">
+            <h2 style="text-align: center; margin-bottom: 30px; color: #2c3e50;">📊 건강검진 분석 결과</h2>
+            
+            <!-- 종합 점수 -->
+            <div class="health-section">
+                <h3>🎯 종합 건강 점수</h3>
+                <div style="text-align: center;">
+                    <div class="score-circle score-good" id="health-score-circle">
+                        <span id="health-score">85</span>
+                    </div>
+                    <h4 id="health-grade">좋음</h4>
+                    <p id="health-summary">전반적으로 건강한 상태입니다.</p>
+                </div>
+            </div>
+            
+            <!-- 기본 정보 -->
+            <div class="health-section">
+                <h3>👤 기본 정보</h3>
+                <div class="health-grid">
+                    <div class="health-card">
+                        <h4>BMI</h4>
+                        <div class="health-value" id="bmi-value">23.1</div>
+                        <div class="health-status status-normal" id="bmi-status">정상</div>
+                    </div>
+                    <div class="health-card">
+                        <h4>연령대 평균 비교</h4>
+                        <div class="health-value" id="age-comparison">+0.5</div>
+                        <div class="health-status status-normal">평균 대비</div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 주요 검진 결과 -->
+            <div class="health-section">
+                <h3>🔬 주요 검진 결과</h3>
+                <div class="health-grid" id="main-results">
+                    <!-- 동적으로 생성될 내용 -->
+                </div>
+            </div>
+            
+            <!-- 위험 요소 -->
+            <div class="health-section">
+                <h3>⚠️ 주의할 점</h3>
+                <div id="risk-factors">
+                    <!-- 동적으로 생성될 내용 -->
+                </div>
+            </div>
+            
+            <!-- 맞춤형 권장사항 -->
+            <div class="health-section">
+                <h3>💡 맞춤형 건강 관리 방법</h3>
+                <div class="health-grid">
+                    <div class="health-card">
+                        <h4>🍽️ 식단 관리</h4>
+                        <ul class="recommendation-list" id="diet-recommendations">
+                            <!-- 동적으로 생성될 내용 -->
+                        </ul>
+                    </div>
+                    <div class="health-card">
+                        <h4>🏃‍♂️ 운동</h4>
+                        <ul class="recommendation-list" id="exercise-recommendations">
+                            <!-- 동적으로 생성될 내용 -->
+                        </ul>
+                    </div>
+                    <div class="health-card">
+                        <h4>🌱 생활습관</h4>
+                        <ul class="recommendation-list" id="lifestyle-recommendations">
+                            <!-- 동적으로 생성될 내용 -->
+                        </ul>
+                    </div>
+                    <div class="health-card">
+                        <h4>🏥 정기검진</h4>
+                        <ul class="recommendation-list" id="checkup-recommendations">
+                            <!-- 동적으로 생성될 내용 -->
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- AI 분석 -->
+            <div class="health-section">
+                <h3>🤖 AI 전문 분석</h3>
+                <div class="health-card">
+                    <div id="ai-analysis" style="line-height: 1.8;">
+                        <!-- AI 분석 결과가 여기에 표시됩니다 -->
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 쉬운 설명 -->
+            <div class="health-section">
+                <h3>📖 쉬운 용어 설명</h3>
+                <div id="simple-explanations">
+                    <!-- 동적으로 생성될 내용 -->
+                </div>
+            </div>
+            
+            <div style="text-align: center; margin-top: 30px;">
+                <button type="button" class="btn btn-secondary" onclick="showLanding()">🏠 처음으로</button>
+                <button type="button" class="btn" onclick="window.print()">🖨️ 결과 인쇄</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 페이지 네비게이션
+        function showLanding() {
+            document.getElementById('landing-page').style.display = 'block';
+            document.getElementById('upload-form').style.display = 'none';
+            document.getElementById('manual-form').style.display = 'none';
+            document.getElementById('results-page').style.display = 'none';
+        }
+        
+        function showUploadForm() {
+            document.getElementById('landing-page').style.display = 'none';
+            document.getElementById('upload-form').style.display = 'block';
+            document.getElementById('manual-form').style.display = 'none';
+            document.getElementById('results-page').style.display = 'none';
+        }
+        
+        function showManualForm() {
+            document.getElementById('landing-page').style.display = 'none';
+            document.getElementById('upload-form').style.display = 'none';
+            document.getElementById('manual-form').style.display = 'block';
+            document.getElementById('results-page').style.display = 'none';
+        }
+        
+        function showResults() {
+            document.getElementById('landing-page').style.display = 'none';
+            document.getElementById('upload-form').style.display = 'none';
+            document.getElementById('manual-form').style.display = 'none';
+            document.getElementById('results-page').style.display = 'block';
+        }
+        
+        // 파일 업로드 처리
+        document.getElementById('file-input').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                document.getElementById('file-info').textContent = `선택된 파일: ${file.name}`;
+                document.getElementById('upload-area').style.background = 'rgba(102, 126, 234, 0.1)';
+            }
+        });
+        
+        // 드래그 앤 드롭 처리
+        const uploadArea = document.getElementById('upload-area');
+        
+        uploadArea.addEventListener('dragover', function(e) {
+            e.preventDefault();
+            uploadArea.classList.add('dragover');
+        });
+        
+        uploadArea.addEventListener('dragleave', function(e) {
+            e.preventDefault();
+            uploadArea.classList.remove('dragover');
+        });
+        
+        uploadArea.addEventListener('drop', function(e) {
+            e.preventDefault();
+            uploadArea.classList.remove('dragover');
+            
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                document.getElementById('file-input').files = files;
+                document.getElementById('file-info').textContent = `선택된 파일: ${files[0].name}`;
+                uploadArea.style.background = 'rgba(102, 126, 234, 0.1)';
+            }
+        });
+        
+        // 폼 제출 시 진행률 표시
+        document.getElementById('upload-form-element').addEventListener('submit', function(e) {
+            const progressBar = document.getElementById('progress-bar');
+            const progressFill = document.getElementById('progress-fill');
+            
+            progressBar.style.display = 'block';
+            
+            let progress = 0;
+            const interval = setInterval(function() {
+                progress += Math.random() * 30;
+                if (progress >= 90) {
+                    progress = 90;
+                    clearInterval(interval);
+                }
+                progressFill.style.width = progress + '%';
+            }, 200);
+        });
+        
+        document.getElementById('manual-form-element').addEventListener('submit', function(e) {
+            // 수동 입력 폼 제출 시 처리
+            console.log('수동 입력 폼 제출됨');
+        });
+        
+        // BMI 자동 계산
+        function calculateBMI() {
+            const height = parseFloat(document.getElementById('height')?.value || document.getElementById('manual_height')?.value);
+            const weight = parseFloat(document.getElementById('weight')?.value || document.getElementById('manual_weight')?.value);
+            
+            if (height && weight) {
+                const bmi = weight / ((height / 100) ** 2);
+                console.log(`계산된 BMI: ${bmi.toFixed(1)}`);
+            }
+        }
+        
+        // 실시간 BMI 계산
+        ['height', 'weight', 'manual_height', 'manual_weight'].forEach(id => {
+            const element = document.getElementById(id);
+            if (element) {
+                element.addEventListener('input', calculateBMI);
+            }
+        });
+        
+        // 결과 페이지 데이터 표시 함수들
+        function displayHealthScore(score, grade) {
+            document.getElementById('health-score').textContent = score;
+            document.getElementById('health-grade').textContent = grade;
+            
+            const circle = document.getElementById('health-score-circle');
+            circle.className = 'score-circle';
+            
+            if (score >= 90) {
+                circle.classList.add('score-excellent');
+            } else if (score >= 80) {
+                circle.classList.add('score-good');
+            } else if (score >= 60) {
+                circle.classList.add('score-fair');
+            } else {
+                circle.classList.add('score-poor');
+            }
+        }
+        
+        function displayMainResults(results) {
+            const container = document.getElementById('main-results');
+            container.innerHTML = '';
+            
+            results.forEach(result => {
+                const card = document.createElement('div');
+                card.className = 'health-card';
+                card.innerHTML = `
+                    <h4>${result.name}</h4>
+                    <div class="health-value">${result.value}</div>
+                    <div class="health-status ${result.statusClass}">${result.status}</div>
+                `;
+                container.appendChild(card);
+            });
+        }
+        
+        function displayRecommendations(recommendations) {
+            ['diet', 'exercise', 'lifestyle', 'checkup'].forEach(category => {
+                const list = document.getElementById(`${category}-recommendations`);
+                list.innerHTML = '';
+                
+                const items = recommendations[category] || [];
+                items.forEach(item => {
+                    const li = document.createElement('li');
+                    li.textContent = item;
+                    list.appendChild(li);
+                });
+            });
+        }
+        
+        // 예시 데이터로 결과 페이지 테스트 (실제로는 서버에서 받아올 데이터)
+        function loadSampleResults() {
+            displayHealthScore(85, '좋음');
+            
+            displayMainResults([
+                {name: '혈압', value: '125/80', status: '주의', statusClass: 'status-warning'},
+                {name: '혈당', value: '95', status: '정상', statusClass: 'status-normal'},
+                {name: '콜레스테롤', value: '180', status: '정상', statusClass: 'status-normal'},
+                {name: '간기능', value: '정상', status: '정상', statusClass: 'status-normal'}
+            ]);
+            
+            displayRecommendations({
+                diet: ['나트륨 섭취 줄이기', '과일과 채소 늘리기', '금주 또는 절주'],
+                exercise: ['주 5회 30분 유산소 운동', '근력운동 주 2-3회'],
+                lifestyle: ['금연 실천', '충분한 수면', '스트레스 관리'],
+                checkup: ['혈압 정기 측정', '매년 종합검진']
+            });
+        }
+        
+        // 페이지 로드 시 초기화
+        document.addEventListener('DOMContentLoaded', function() {
+            showLanding();
+        });
+    </script>
+</body>
+</html>
